@@ -1,0 +1,62 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+
+  progress  Progress[]
+  mistakes  Mistake[]
+  vocabs    Vocab[]
+  sessions  Session[]
+}
+
+model Progress {
+  id        String   @id @default(cuid())
+  userId    String
+  module    String   // listening | reading | writing | speaking
+  score     Float
+  date      DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Mistake {
+  id         String   @id @default(cuid())
+  userId     String
+  module     String
+  questionId String
+  content    String
+  errorType  String
+  count      Int      @default(1)
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Vocab {
+  id        String   @id @default(cuid())
+  userId    String
+  word      String
+  definition String
+  context   String?
+  mastered  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+}
